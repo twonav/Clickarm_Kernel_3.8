@@ -51,7 +51,9 @@
 #include <plat/cpu.h>
 #include <plat/devs.h>
 #include <plat/gpio-cfg.h>
+#if defined(CONFIG_EXYNOS4_SETUP_KEYPAD)
 #include <plat/keypad.h>
+#endif
 #include <plat/mfc.h>
 #include <plat/regs-serial.h>
 #include <plat/sdhci.h>
@@ -81,6 +83,12 @@ extern int velo_version;
 
 
 extern void exynos4_setup_dwmci_cfg_gpio(struct platform_device *dev, int width);
+
+#if defined(CONFIG_ARCH_EXYNOS4)
+#define HDMI_GPX(_nr)	EXYNOS4_GPX3(_nr)
+#elif defined(CONFIG_ARCH_EXYNOS5)
+#define HDMI_GPX(_nr)	EXYNOS5_GPX3(_nr)
+#endif
 
 /* Following are default values for UCON, ULCON and UFCON UART registers */
 #define CLICKARM4412_UCON_DEFAULT	(S3C2410_UCON_TXILEVEL |	\
@@ -264,32 +272,34 @@ static struct platform_device tps611xx = {
 };
 
 /*Audio Codec MAX98090 Configuration*/
-#if defined(CONFIG_SND_SOC_MAX98090)
-#include <sound/max98090.h>
-static struct max98090_pdata max98090 = {
-	.digmic_left_mode	= 0,
-	.digmic_right_mode	= 0,
-	.digmic_3_mode		= 0,
-	.digmic_4_mode		= 0,
-};
-#endif
+//#if defined(CONFIG_SND_SOC_MAX98090)
+//#include <sound/max98090.h>
+//static struct max98090_pdata max98090 = {
+//	.digmic_left_mode	= 0,
+//	.digmic_right_mode	= 0,
+//	.digmic_3_mode		= 0,
+//	.digmic_4_mode		= 0,
+//};
+//#endif
 
 /*END OF Audio Codec MAX98090 Configuration*/
 
 /*Ambient light sensor MAX44005 Configuration*/
-// static struct max44005_platform_data max44005_driver = {
-// 	.class	= I2C_CLASS_HWMON,
-// 	.driver  = {
-// 		.name = "max44005",
-// 		.owner = THIS_MODULE,
-// 		.of_match_table = of_match_ptr(max44005_of_match),
-// 		.pm = MAX44005_PM_OPS,
-// 	},
-// 	.probe	 = max44005_probe,
-// 	.shutdown = max44005_shutdown,
-// 	.remove  = max44005_remove,
-// 	.id_table = max44005_id,
-// };
+#if defined(CONFIG_SENSORS_MAX44005)  // ambient light sensor
+ static struct max44005_platform_data max44005_driver = {
+ 	.class	= I2C_CLASS_HWMON,
+ 	.driver  = {
+ 		.name = "max44005",
+ 		.owner = THIS_MODULE,
+ 		.of_match_table = of_match_ptr(max44005_of_match),
+ 		.pm = MAX44005_PM_OPS,
+ 	},
+ 	.probe	 = max44005_probe,
+ 	.shutdown = max44005_shutdown,
+ 	.remove  = max44005_remove,
+ 	.id_table = max44005_id,
+ };
+#endif
 /*END OF Ambient light sensor MAX44005 Configuration*/
 
 /*Devices Conected on I2C BUS 0 LISTED ABOVE*/
@@ -374,14 +384,13 @@ static struct i2c_board_info clickarm4412_i2c_devs4[] __initdata = {
 		.platform_data  = &ds278x_pdata,
 	},
 #endif
-#if defined(CONFIG_FAN54040)
-/**/
-	{
-		I2C_BOARD_INFO("fan54040", 0x6B),
-		.platform_data  = &tsc2007_info,
-		.irq		= VELO_FAN_INT,/*xeint8 // GPM3CON0 CHAGE STATUS // GPM3CON1 DISABLE CHARGE*/
-	},
-#endif
+//#if defined(CONFIG_FAN54040)
+//	{
+//		I2C_BOARD_INFO("fan54040", 0x6B),
+//		.platform_data  = &tsc2007_info,
+//		.irq		= VELO_FAN_INT,/*xeint8 // GPM3CON0 CHAGE STATUS // GPM3CON1 DISABLE CHARGE*/
+//	},
+//#endif
 #if defined(CONFIG_SENSOR_MPU9250)
 	{
 	     I2C_BOARD_INFO("mpu9250", 0x68),
@@ -853,46 +862,46 @@ static struct platform_device clickarm_lcd_spi = {
 #endif
 
 static struct platform_device *clickarm4412_devices[] __initdata = {
-	&tps611xx,
-	&s3c_device_hsmmc2,
-	&s3c_device_hsmmc3,
+	//&tps611xx,
+	//&s3c_device_hsmmc2,
+	//&s3c_device_hsmmc3,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
 	&gpio_device_i2c4,
 #if defined(CONFIG_W1_MASTER_GPIO) || defined(CONFIG_W1_MASTER_GPIO_MODULE)
-        &clickarm_w1_device,
+    //    &clickarm_w1_device,
 #endif
 	&s3c_device_rtc,
-	&s3c_device_usb_hsotg,
+	//&s3c_device_usb_hsotg,
 	&s3c_device_wdt,
-	&s5p_device_ehci,
+	//&s5p_device_ehci,
 #ifdef CONFIG_SND_SAMSUNG_I2S
-	&exynos4_device_i2s0,
+	//&exynos4_device_i2s0,
 #endif
-	&s5p_device_fimd0,
-	&s5p_device_mfc,
-	&s5p_device_mfc_l,
-	&s5p_device_mfc_r,
-	&s5p_device_g2d,
-	&s5p_device_jpeg,
-	&mali_gpu_device,
+	//&s5p_device_fimd0,
+	//&s5p_device_mfc,
+	//&s5p_device_mfc_l,
+	//&s5p_device_mfc_r,
+	//&s5p_device_g2d,
+	//&s5p_device_jpeg,
+	//&mali_gpu_device,
 #if defined(CONFIG_S5P_DEV_TV)
-	&s5p_device_hdmi,
-	&s5p_device_cec,
-	&s5p_device_i2c_hdmiphy,
-	&s5p_device_mixer,
-	&hdmi_fixed_voltage,
+	//&s5p_device_hdmi,
+	//&s5p_device_cec,
+	//&s5p_device_i2c_hdmiphy,
+	//&s5p_device_mixer,
+	//&hdmi_fixed_voltage,
 #endif
-	&exynos4_device_ohci,
+	//&exynos4_device_ohci,
 	&exynos_device_dwmci,
 //	&clickarm4412_leds_gpio,
 #if defined(CONFIG_LCD_T55149GD030J) && !defined(CONFIG_CLICKARM_OTHERS) && defined(CONFIG_DRM_EXYNOS_FIMD)
-	&clickarm4412_lcd_t55149gd030j,
+	//&clickarm4412_lcd_t55149gd030j,
 #endif
-	&clickarm4412_gpio_keys,
-	&samsung_asoc_idma,
+	//&clickarm4412_gpio_keys,
+	//&samsung_asoc_idma,
 #if defined(CONFIG_SND_SOC_HKDK_MAX98090)
-	&hardkernel_audio_device,
+	//&hardkernel_audio_device,
 #endif
 #if defined(CONFIG_EXYNOS_THERMAL)
 	&clickarm4412_tmu,
@@ -903,12 +912,12 @@ static struct platform_device *clickarm4412_devices[] __initdata = {
 #endif
 
 #if defined(CONFIG_LCD_T55149GD030J)
-	&clickarm_lcd_spi,
+	//&clickarm_lcd_spi,
 #else
-	&s3c64xx_device_spi1,
+	//&s3c64xx_device_spi1,
 #endif
 #if defined(CONFIG_USB_EXYNOS_SWITCH)
-	&s5p_device_usbswitch,
+	//&s5p_device_usbswitch,
 #endif
 };
 
@@ -946,21 +955,21 @@ static void __init clickarm4412_gpio_init(void)
 /*********************************************************************/
 /*				WIFI MODULE CONFIGURATION									 */
 /*********************************************************************/
-	/* WLAN_EN */	
+	/* WLAN_EN */
 	gpio_request_one(EXYNOS4_GPJ1(4), GPIOF_OUT_INIT_LOW, "WLAN_EN");
-        s3c_gpio_cfgpin(EXYNOS4_GPJ1(4), S3C_GPIO_OUTPUT );
+		s3c_gpio_cfgpin(EXYNOS4_GPJ1(4), S3C_GPIO_OUTPUT );
         s3c_gpio_setpull(EXYNOS4_GPJ1(4), S3C_GPIO_PULL_NONE);
         gpio_free(EXYNOS4_GPJ1(4));
-	/* BT_EN */	
+	/* BT_EN */
 	gpio_request_one(EXYNOS4_GPJ0(6), GPIOF_OUT_INIT_LOW, "BT_EN");
         s3c_gpio_cfgpin(EXYNOS4_GPJ0(6), S3C_GPIO_OUTPUT );
         s3c_gpio_setpull(EXYNOS4_GPJ0(6), S3C_GPIO_PULL_NONE);
         gpio_free(EXYNOS4_GPJ0(6));
 
-	/* WLAN_IRQ */	
+	/* WLAN_IRQ */
 	gpio_request_one(EXYNOS4_GPX0(1), GPIOF_IN, "WLAN_IRQ");
-    s3c_gpio_cfgpin(EXYNOS4_GPX0(1), S3C_GPIO_INPUT );
-    s3c_gpio_setpull(EXYNOS4_GPX0(1), S3C_GPIO_PULL_DOWN);
+    	s3c_gpio_cfgpin(EXYNOS4_GPX0(1), S3C_GPIO_INPUT );
+    	s3c_gpio_setpull(EXYNOS4_GPX0(1), S3C_GPIO_PULL_DOWN);
 	
 /*********************************************************************/
 /*				GPS CONFIGURATION									 */
@@ -1034,7 +1043,8 @@ static void clickarm4412_power_off(void)
 static int clickarm4412_reboot_notifier(struct notifier_block *this, unsigned long code, void *_cmd) {
 	pr_emerg("exynos4-reboot: Notifier called\n");
 
-	__raw_writel(0, S5P_INFORM4);
+	/* Basetis: Registro SP5_INFORM4 no existe */
+	//__raw_writel(0, S5P_INFORM4);
 
         // eMMC HW_RST  
         gpio_request(EXYNOS4_GPK1(2), "GPK1");
@@ -1051,6 +1061,16 @@ static struct notifier_block clickarm4412_reboot_notifier_nb = {
 	.notifier_call = clickarm4412_reboot_notifier,
 };
 
+
+#if defined(CONFIG_S5P_DEV_TV)
+void s5p_cec_cfg_gpio(struct platform_device *pdev)
+{
+	s3c_gpio_cfgpin(HDMI_GPX(6), S3C_GPIO_SFN(0x3));
+	s3c_gpio_setpull(HDMI_GPX(6), S3C_GPIO_PULL_NONE);
+}
+#endif
+
+
 static void __init clickarm4412_machine_init(void)
 {
 	printk(KERN_INFO "EBM velo version: %s\n", velo_version);
@@ -1065,7 +1085,6 @@ static void __init clickarm4412_machine_init(void)
 				ARRAY_SIZE(clickarm4412_i2c_devs0));
 
 	s3c_i2c1_set_platdata(NULL);
-
 	i2c_register_board_info(1, clickarm4412_i2c_devs1,
 				ARRAY_SIZE(clickarm4412_i2c_devs1));
 
@@ -1073,41 +1092,42 @@ static void __init clickarm4412_machine_init(void)
 				ARRAY_SIZE(clickarm4412_i2c_devs4));
 	
 /*SDIO_HCI CONFIGURATION ARRAY*/
-//	s3c_sdhci2_set_platdata(&clickarm4412_hsmmc2_pdata);
-//	s3c_sdhci3_set_platdata(&clickarm4412_hsmmc3_pdata);
+	//s3c_sdhci2_set_platdata(&clickarm4412_hsmmc2_pdata);
+	//s3c_sdhci3_set_platdata(&clickarm4412_hsmmc3_pdata);
 
-	exynos4_setup_dwmci_cfg_gpio(NULL, MMC_BUS_WIDTH_4);
-	exynos_dwmci_set_platdata(&clickarm4412_dwmci_pdata);
+	///exynos4_setup_dwmci_cfg_gpio(NULL, MMC_BUS_WIDTH_4);
+	//exynos_dwmci_set_platdata(&clickarm4412_dwmci_pdata);
 
-	clickarm4412_ehci_init();
-	clickarm4412_ohci_init();
-	s3c_hsotg_set_platdata(&clickarm4412_hsotg_pdata);
+	//clickarm4412_ehci_init();
+	//clickarm4412_ohci_init();
+	//s3c_hsotg_set_platdata(&clickarm4412_hsotg_pdata);
 
 #ifdef CONFIG_USB_EXYNOS_SWITCH
-	clickarm4412_usbswitch_init();
+	//clickarm4412_usbswitch_init();
 #endif
 
 	//s3c64xx_spi1_set_platdata(NULL, 0, 1);
-	spi_register_board_info(spi1_board_info, ARRAY_SIZE(spi1_board_info));
+	//spi_register_board_info(spi1_board_info, ARRAY_SIZE(spi1_board_info));
 
 #if defined(CONFIG_LCD_T55149GD030J) && !defined(CONFIG_CLICKARM_OTHERS) && defined(CONFIG_DRM_EXYNOS_FIMD)
-	s5p_device_fimd0.dev.platform_data = &drm_fimd_pdata;
-	exynos4_fimd0_gpio_setup_24bpp();
+	//s5p_device_fimd0.dev.platform_data = &drm_fimd_pdata;
+	//exynos4_fimd0_gpio_setup_24bpp();
 #endif
-	init_button_irqs();
+	//init_button_irqs();
 
 	platform_add_devices(clickarm4412_devices, ARRAY_SIZE(clickarm4412_devices));
 
 	register_reboot_notifier(&clickarm4412_reboot_notifier_nb);
 
 	/*WIFI PLATFORM DATA*/
+	/*
 	clickarm4412_wl12xx_wlan_data.irq = gpio_to_irq(EXYNOS4_GPX0(1));
 	printk("clickarm4412_wl12xx_wlan_data.irq: %d\n",clickarm4412_wl12xx_wlan_data.irq);
 	wl12xx_set_platform_data(&clickarm4412_wl12xx_wlan_data);
-
+	*/
 }
 
-MACHINE_START(CLICKARM4412, "ClickArm4412")
+MACHINE_START(CLICKARM4412, "Velo")
 	/* Maintainer: Dongjin Kim <dongjin.kim@agreeyamobiity.net> */
 	.atag_offset	= 0x100,
 	.smp		= smp_ops(exynos_smp_ops),

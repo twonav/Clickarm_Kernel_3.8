@@ -9,6 +9,27 @@
  * published by the Free Software Foundation.
 */
 
+
+/*
+ * BASETIS:
+ *
+ * 	1) Añadidos comentarios de correcciones que se tendrían que hacer.
+ * 	2) Algunos nombres de registros difieren del datasheet. Se añade indicaciones sobre ello.
+ *
+ * 	Comentarios:
+ * 		1) Este driver NO configura ni APLL ni MPLL. Sólo VPLL y EPLL.
+ * 		2) Los valores de APLL y MPLL vienen configurados por los drivers del U-Boot.
+ * 		3) El valor de APLL (1GHz) es correcto.
+ * 		4) El valor de MPLL (880MHz) es incorrecto. Debe ser 800MHz (-10%).
+ * 		5) MPLL a 880MHz crea overclocking de +10% en:
+ * 				· ACLK100
+ * 				· ACLK133
+ * 				· ACLK160
+ * 		6) Este fichero no ha sido totalmente revisado.
+ *
+ */
+
+
 #include <linux/kernel.h>
 #include <linux/err.h>
 #include <linux/io.h>
@@ -30,6 +51,8 @@
 #include "common.h"
 #include "clock-exynos4.h"
 
+// BASETIS: conjunto de registros de la CMU guardados durante Suspend.
+// BASETIS: definición de los regs. en /mach-exynos/include/mach/regs-clock.h
 #ifdef CONFIG_PM_SLEEP
 static struct sleep_save exynos4_clock_save[] = {
 	SAVE_ITEM(EXYNOS4_CLKDIV_LEFTBUS),
@@ -38,19 +61,23 @@ static struct sleep_save exynos4_clock_save[] = {
 	SAVE_ITEM(EXYNOS4_CLKGATE_IP_RIGHTBUS),
 	SAVE_ITEM(EXYNOS4_CLKSRC_TOP0),
 	SAVE_ITEM(EXYNOS4_CLKSRC_TOP1),
+	// BASETIS: es "CAM0" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKSRC_CAM),
 	SAVE_ITEM(EXYNOS4_CLKSRC_TV),
 	SAVE_ITEM(EXYNOS4_CLKSRC_MFC),
 	SAVE_ITEM(EXYNOS4_CLKSRC_G3D),
+	// BASETIS: es "LCD" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKSRC_LCD0),
 	SAVE_ITEM(EXYNOS4_CLKSRC_MAUDIO),
 	SAVE_ITEM(EXYNOS4_CLKSRC_FSYS),
 	SAVE_ITEM(EXYNOS4_CLKSRC_PERIL0),
 	SAVE_ITEM(EXYNOS4_CLKSRC_PERIL1),
+	// BASETIS: es "CAM0" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKDIV_CAM),
 	SAVE_ITEM(EXYNOS4_CLKDIV_TV),
 	SAVE_ITEM(EXYNOS4_CLKDIV_MFC),
 	SAVE_ITEM(EXYNOS4_CLKDIV_G3D),
+	// BASETIS: es "LCD" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKDIV_LCD0),
 	SAVE_ITEM(EXYNOS4_CLKDIV_MAUDIO),
 	SAVE_ITEM(EXYNOS4_CLKDIV_FSYS0),
@@ -64,9 +91,12 @@ static struct sleep_save exynos4_clock_save[] = {
 	SAVE_ITEM(EXYNOS4_CLKDIV_PERIL4),
 	SAVE_ITEM(EXYNOS4_CLKDIV_PERIL5),
 	SAVE_ITEM(EXYNOS4_CLKDIV_TOP),
+	// BASETIS: este reg. no existe !!
 	SAVE_ITEM(EXYNOS4_CLKSRC_MASK_TOP),
+	// BASETIS: es "CAM0" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKSRC_MASK_CAM),
 	SAVE_ITEM(EXYNOS4_CLKSRC_MASK_TV),
+	// BASETIS: es "LCD" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKSRC_MASK_LCD0),
 	SAVE_ITEM(EXYNOS4_CLKSRC_MASK_MAUDIO),
 	SAVE_ITEM(EXYNOS4_CLKSRC_MASK_FSYS),
@@ -87,152 +117,235 @@ static struct sleep_save exynos4_clock_save[] = {
 	SAVE_ITEM(EXYNOS4_CLKSRC_DMC),
 	SAVE_ITEM(EXYNOS4_CLKDIV_DMC0),
 	SAVE_ITEM(EXYNOS4_CLKDIV_DMC1),
+	// BASETIS: es "DMC0" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKGATE_IP_DMC),
 	SAVE_ITEM(EXYNOS4_CLKSRC_CPU),
+	// BASETIS: es "CPU0" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKDIV_CPU),
+	// BASETIS: es "CPU1" en el datasheet
 	SAVE_ITEM(EXYNOS4_CLKDIV_CPU + 0x4),
+	// BASETIS: este reg. no existe !!
 	SAVE_ITEM(EXYNOS4_CLKGATE_SCLKCPU),
 	SAVE_ITEM(EXYNOS4_CLKGATE_IP_CPU),
+
+	// BASETIS: Faltarían los siguientes registros (nomenclatura según datasheet):
+	//				· CLK_SRC_LEFTBUS
+	//				· CLK_SRC_RIGHTBUS
+	//				· CLK_SRC_ISP
+	//				. CLK_SRC_CAM1
+	//				· CLK_DIV_CAM1
+	//				· CLK_DIV_ISP
+	//				· CLK_DIV_ISP0
+	//				· CLK_DIV_ISP1
+	//				· CLK_SRC_MASK_ISP
+	//				· CLK_GATE_IP_IMAGE			(Está en /mach-exynos/clock-exynos4212.c)
+	//				· CLK_GATE_IP_PERIR			(Está en /mach-exynos/clock-exynos4212.c)
+	//				· CLK_GATE_IP_ISP
+	//				· CLK_GATE_BUS_FSYS1
+	//				· CLK_GATE_BUS_DMC0
+	//				· CLK_GATE_BUS_DMC1
+	//				· CLK_GATE_IP_DMC1
+	//				· CLK_GATE_IP_ISP0
+	//				· CLK_GATE_IP_ISP1
 };
 #endif
 
+
+// BASETIS: corregir las siguientes definiciones de clocks !!
+
+// BASETIS: esta señal no se utiliza. Además tendría que ser 24MHz.
 static struct clk exynos4_clk_sclk_hdmi27m = {
 	.name		= "sclk_hdmi27m",
 	.rate		= 27000000,
 };
 
+// BASETIS: esta señal sería de 24MHz
 static struct clk exynos4_clk_sclk_hdmiphy = {
 	.name		= "sclk_hdmiphy",
 };
 
+// BASETIS: esta señal tiene que ser de 24MHz !!
 static struct clk exynos4_clk_sclk_usbphy0 = {
 	.name		= "sclk_usbphy0",
 	.rate		= 27000000,
 };
 
+// BASETIS: esta señal no existe en el Exynos4412
 static struct clk exynos4_clk_sclk_usbphy1 = {
 	.name		= "sclk_usbphy1",
 };
 
+// BASETIS: no se sabe para que utilizan esta señal dummy...
 static struct clk dummy_apb_pclk = {
 	.name		= "apb_pclk",
 	.id		= -1,
 };
 
+
+
+
+// BASETIS: la función "s5p_gatectrl()" sirve para conectar/desconectar los clocks.
+
 static int exynos4_clksrc_mask_top_ctrl(struct clk *clk, int enable)
 {
+	// BASETIS: este reg. no existe !!
 	return s5p_gatectrl(EXYNOS4_CLKSRC_MASK_TOP, clk, enable);
 }
 
+// BASETIS: gating del CAM_BLK output mux.
 static int exynos4_clksrc_mask_cam_ctrl(struct clk *clk, int enable)
 {
+	// BASETIS: es "CAM0" en el datasheet
 	return s5p_gatectrl(EXYNOS4_CLKSRC_MASK_CAM, clk, enable);
 }
 
+// BASETIS: gating del LCD0_BLK output mux.
 static int exynos4_clksrc_mask_lcd0_ctrl(struct clk *clk, int enable)
 {
+	// BASETIS: es "LCD" en el datasheet
 	return s5p_gatectrl(EXYNOS4_CLKSRC_MASK_LCD0, clk, enable);
 }
 
+// BASETIS: gating del FSYS_BLK output mux.
 int exynos4_clksrc_mask_fsys_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKSRC_MASK_FSYS, clk, enable);
 }
 
+// BASETIS: gating del PERIL0_BLK output mux.
 static int exynos4_clksrc_mask_peril0_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKSRC_MASK_PERIL0, clk, enable);
 }
 
+// BASETIS: gating del PERIL1_BLK output mux.
 static int exynos4_clksrc_mask_peril1_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKSRC_MASK_PERIL1, clk, enable);
 }
 
+// BASETIS: gating del IP MFC clock.
 static int exynos4_clk_ip_mfc_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_MFC, clk, enable);
 }
 
+// BASETIS: gating del TV_BLK output mux.
 static int exynos4_clksrc_mask_tv_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKSRC_MASK_TV, clk, enable);
 }
 
+// BASETIS: gating del IP CAM clock.
 static int exynos4_clk_ip_cam_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_CAM, clk, enable);
 }
 
+// BASETIS: gating del IP TV clock.
 static int exynos4_clk_ip_tv_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_TV, clk, enable);
 }
 
+// BASETIS: gating del IP G3D clock.
 static int exynos4_clk_ip_g3d_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_G3D, clk, enable);
 }
 
+// BASETIS: gating del IP IMAGE clock.
 int exynos4_clk_ip_image_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_IMAGE, clk, enable);
 }
 
+// BASETIS: gating del IP LCD clock.
 static int exynos4_clk_ip_lcd0_ctrl(struct clk *clk, int enable)
 {
+	// BASETIS: es "LCD" en el datasheet
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_LCD0, clk, enable);
 }
 
+// BASETIS: "lcd1" no existe !!. Se refiere al "isp"
 int exynos4_clk_ip_lcd1_ctrl(struct clk *clk, int enable)
 {
+	// BASETIS: no existe !!. Apunta al reg. CLK_GATE_IP_ISP.
 	return s5p_gatectrl(EXYNOS4210_CLKGATE_IP_LCD1, clk, enable);
 }
 
+// BASETIS: gating del IP FSYS clock.
 int exynos4_clk_ip_fsys_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_FSYS, clk, enable);
 }
 
+// BASETIS: gating del IP PERIL clock.
 static int exynos4_clk_ip_peril_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_PERIL, clk, enable);
 }
 
+// BASETIS: gating del IP PERIR clock.
 static int exynos4_clk_ip_perir_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_PERIR, clk, enable);
 }
 
+// BASETIS: esta función no tiene sentido aquí. Es un PLL.
 static int exynos4_clk_vpll_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_VPLL_CON0, clk, enable);
 }
 
+// BASETIS: gating del IP DMC clock.
 int exynos4_clk_ip_dmc_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_DMC, clk, enable);
 }
 
+// BASETIS: función de la PMU, no de la CMU !! ¿Tiene sentido aquí?.
 static int exynos4_clk_hdmiphy_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(S5P_HDMI_PHY_CONTROL, clk, enable);
 }
 
+// BASETIS: función de la PMU, no de la CMU !! ¿Tiene sentido aquí?
+// BASETIS: este registro apunta "HSIC_2_PHY_CONTROL" de la PMU.
 static int exynos4_clk_dac_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(S5P_DAC_PHY_CONTROL, clk, enable);
 }
 
+// BASETIS: gating del MAUDIO_BLK output mux.
 static int exynos4_clksrc_mask_maudio_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKSRC_MASK_MAUDIO, clk, enable);
 }
 
+// BASETIS: este registro parece incorrecto. Hasta la dirección es rara.
 int exynos4_clk_audss_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(S5P_CLKGATE_AUDSS, clk, enable);
 }
+
+// BASETIS: Faltarían los siguientes registros de "gating" (nomenclatura según datasheet):
+//				· CLK_SRC_MASK_ISP
+//				· CLK_SRC_MASK_DMC
+//				. CLK_GATE_IP_LEFTBUS
+//				· CLK_GATE_IP_RIGHTBUS
+//				· CLK_GATE_BUS_FSYS1
+//				· CLK_GATE_IP_GPS
+//				· CLK_GATE_BLOCK
+//				· CLK_GATE_IP_ISP
+//				· CLK_GATE_IP_ISP0
+//				· CLK_GATE_IP-ISP1
+//				· CLK_GATE_IP_CPU
+//				· CLK_GATE_IP_DMC1
+
+
+
+
 
 /* Core list of CMU_CPU side */
 
@@ -240,6 +353,7 @@ static struct clksrc_clk exynos4_clk_mout_apll = {
 	.clk	= {
 		.name		= "mout_apll",
 	},
+	// BASETIS: este clock está definido en /plat-samsung/s5p-clock.c
 	.sources = &clk_src_apll,
 	.reg_src = { .reg = EXYNOS4_CLKSRC_CPU, .shift = 0, .size = 1 },
 };
@@ -247,6 +361,8 @@ static struct clksrc_clk exynos4_clk_mout_apll = {
 static struct clksrc_clk exynos4_clk_sclk_apll = {
 	.clk	= {
 		.name		= "sclk_apll",
+		// BASETIS: "parent" aparece en la estructura clk definida en "clock.h" pero no en "clock-clksrc.h"
+		// BASETIS: ... ¿puede haber conflicto con estructuras en varios include que se llaman igual?!...
 		.parent		= &exynos4_clk_mout_apll.clk,
 	},
 	.reg_div = { .reg = EXYNOS4_CLKDIV_CPU, .shift = 24, .size = 3 },
@@ -334,6 +450,14 @@ static struct clksrc_clk exynos4_clk_periphclk = {
 	.reg_div = { .reg = EXYNOS4_CLKDIV_CPU, .shift = 12, .size = 3 },
 };
 
+// BASETIS: Faltarían los siguientes clocks (nomenclatura según datasheet):
+//				· MOUTHPM, SCLKHPM
+//				· SCLKMPLL_USER_C
+//				· ATCLK
+//				. PCLK_DBG
+
+
+// BASETIS: Según nomenclatura del datasheet, sería "CMU_DMC".
 /* Core list of CMU_CORE side */
 
 static struct clk *exynos4_clkset_corebus_list[] = {
@@ -444,6 +568,7 @@ struct clksrc_clk exynos4_clk_aclk_133 = {
 
 static struct clk *exynos4_clkset_vpllsrc_list[] = {
 	[0] = &clk_fin_vpll,
+	// BASETIS: esta señal no se utiliza !! Además debería ser de 24MHz.
 	[1] = &exynos4_clk_sclk_hdmi27m,
 };
 
@@ -904,6 +1029,7 @@ struct clksrc_clk exynos4_clk_audiocdclk0 = {
 static struct clk *clkset_sclk_audio0_list[] = {
 	[0] = &exynos4_clk_audiocdclk0.clk,
 	[1] = NULL,
+	// BASETIS: este clock no se utiliza !!
 	[2] = &exynos4_clk_sclk_hdmi27m,
 	[3] = &exynos4_clk_sclk_usbphy0,
 	[4] = &clk_ext_xtal_mux,
@@ -1015,14 +1141,21 @@ static struct clk exynos4_clk_fimd0 = {
 };
 
 struct clk *exynos4_clkset_group_list[] = {
+	// BASETIS: este clock no tien un rate definido.
 	[0] = &clk_ext_xtal_mux,
 	[1] = &clk_xusbxti,
+	// BASETIS: este clock no se utiliza !!
 	[2] = &exynos4_clk_sclk_hdmi27m,
 	[3] = &exynos4_clk_sclk_usbphy0,
+	// BASETIS: este clock no existe !!
 	[4] = &exynos4_clk_sclk_usbphy1,
+	// BASETIS: este clock no tiene un rate definido.
 	[5] = &exynos4_clk_sclk_hdmiphy,
+	// BASETIS: fuente de este clock es &clk_src_mpll
 	[6] = &exynos4_clk_mout_mpll.clk,
+	// BASETIS: fuente de este clock es &clk_src_epll
 	[7] = &exynos4_clk_mout_epll.clk,
+	// BASETIS: fuente de este clock es &exynos4_clkset_sdk_vpll
 	[8] = &exynos4_clk_sclk_vpll.clk,
 };
 
@@ -1631,6 +1764,14 @@ static u32 exynos4_vpll_div[][8] = {
         {733000000, 2, 122, 1, 0, 0, 0, 0},
         {750000000, 2, 125, 1, 0, 0, 0, 0},
         {800000000, 2, 133, 1, 0, 0, 0, 0},
+
+		// BASETIS: estos valores difieren de lo indicado en el datasheet.
+		// BASETIS: los valores correctos sería:
+		//				· {100000000, 3, 100, 3, 0, 0, 0, 0}
+		//				· {160000000, 3, 160, 3, 0, 0, 0, 0}
+		//				· {266000000, 3, 133, 2, 0, 0, 0, 0}
+		//				· {350000000, 3, 175, 2, 0, 0, 0, 0}
+		//				· {440000000, 3, 110, 1, 0, 0, 0, 0}
 };
 
 static unsigned long exynos4_vpll_get_rate(struct clk *clk)
@@ -1841,6 +1982,7 @@ void __init_or_cpufreq exynos4_setup_clocks(void)
 	clk_fout_vpll.ops = &exynos4_vpll_ops;
 	clk_fout_vpll.rate = vpll;
 
+	// BASETIS: valores que muestra Linux al cargarse.
 	printk(KERN_INFO "EXYNOS4: PLL settings, A=%ld, M=%ld, E=%ld V=%ld",
 			apll, mpll, epll, vpll);
 
@@ -1852,6 +1994,7 @@ void __init_or_cpufreq exynos4_setup_clocks(void)
 	aclk_160 = clk_get_rate(&exynos4_clk_aclk_160.clk);
 	aclk_133 = clk_get_rate(&exynos4_clk_aclk_133.clk);
 
+	// BASETIS: valores que muestra Linux al cargarse.
 	printk(KERN_INFO "EXYNOS4: ARMCLK=%ld, DMC=%ld, ACLK200=%ld\n"
 			 "ACLK100=%ld, ACLK160=%ld, ACLK133=%ld\n",
 			armclk, sclk_dmc, aclk_200,
@@ -1889,9 +2032,11 @@ void __init_or_cpufreq exynos4_setup_clocks(void)
 }
 
 static struct clk *exynos4_clks[] __initdata = {
+	// BASETIS: este clock no se utiliza !!
 	&exynos4_clk_sclk_hdmi27m,
 	&exynos4_clk_sclk_hdmiphy,
 	&exynos4_clk_sclk_usbphy0,
+	// BASETIS: este clock no existe !!
 	&exynos4_clk_sclk_usbphy1,
 };
 

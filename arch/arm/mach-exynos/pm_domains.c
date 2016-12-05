@@ -13,6 +13,21 @@
  * published by the Free Software Foundation.
 */
 
+
+/*
+ * BASETIS:
+ *
+ * 	1) Añadido comentario sobre nombre de registro incorrecto.
+ * 	2) Añadido código para desactivar 'power domains' de CPU 1, 2 y 3, y Cachés.
+ *
+ * 	Comentarios:
+ * 		1) No se observan cambios en el consumo al añadir los 'power domains' descritos.
+ * 		2) Parece código innecesario ya que el driver del DVFS ya desactiva CPU 2 y 3.
+ * 		3) Ya que no afecta, se deja esta parte de código comentada.
+ *
+ */
+
+
 #include <linux/io.h>
 #include <linux/err.h>
 #include <linux/slab.h>
@@ -229,10 +244,16 @@ static __init __maybe_unused void exynos_pm_add_dev_to_genpd(struct platform_dev
 EXYNOS_GPD(exynos4_pd_mfc, S5P_PMU_MFC_CONF, "pd-mfc");
 EXYNOS_GPD(exynos4_pd_g3d, S5P_PMU_G3D_CONF, "pd-g3d");
 EXYNOS_GPD(exynos4_pd_lcd0, S5P_PMU_LCD0_CONF, "pd-lcd0");
+// BASETIS: el nombre "lcd1" es incorrecto. Realmente apunta al registro ISP_CONGIGURATION.
 EXYNOS_GPD(exynos4_pd_lcd1, S5P_PMU_LCD1_CONF, "pd-lcd1");
 EXYNOS_GPD(exynos4_pd_tv, S5P_PMU_TV_CONF, "pd-tv");
 EXYNOS_GPD(exynos4_pd_cam, S5P_PMU_CAM_CONF, "pd-cam");
 EXYNOS_GPD(exynos4_pd_gps, S5P_PMU_GPS_CONF, "pd-gps");
+// BASETIS: añadimos Power Domains que faltarían (ver sección 8-6 del datasheet)
+//EXYNOS_GPD(exynos4_pd_cpu1, S5P_ARM_CORE1_CONFIGURATION, "pd-cpu1");
+//EXYNOS_GPD(exynos4_pd_cpu2, S5P_ARM_CORE2_CONFIGURATION, "pd-cpu2");
+//EXYNOS_GPD(exynos4_pd_cpu3, S5P_ARM_CORE3_CONFIGURATION, "pd-cpu3");
+//EXYNOS_GPD(exynos4_pd_l2_1, S5P_ARM_L2_1_CONFIGURATION, "pd-l2_1");
 
 static struct exynos_pm_domain *exynos4_pm_domains[] = {
 	&exynos4_pd_mfc,
@@ -242,6 +263,11 @@ static struct exynos_pm_domain *exynos4_pm_domains[] = {
 	&exynos4_pd_tv,
 	&exynos4_pd_cam,
 	&exynos4_pd_gps,
+	// BASETIS: añadimos Power Domains que faltarían
+	//&exynos4_pd_cpu1,
+	//&exynos4_pd_cpu3,
+	//&exynos4_pd_cpu2,
+	//&exynos4_pd_l2_1,
 };
 
 static __init int exynos4_pm_init_power_domain(void)

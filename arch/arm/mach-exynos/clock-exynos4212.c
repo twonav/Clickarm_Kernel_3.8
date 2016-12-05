@@ -9,6 +9,16 @@
  * published by the Free Software Foundation.
 */
 
+
+/*
+ * BASETIS:
+ *
+ * 	1) Añadidos comentarios de correcciones que se tendrían que hacer.
+ * 	2) Algunos nombres de registros difieren del datasheet. Se añade indicaciones sobre ello.
+ *
+ */
+
+
 #include <linux/kernel.h>
 #include <linux/err.h>
 #include <linux/clk.h>
@@ -33,13 +43,16 @@
 
 #ifdef CONFIG_PM_SLEEP
 static struct sleep_save exynos4212_clock_save[] = {
+	// BASETIS: este registro apunta a una dirección reservada !!
 	SAVE_ITEM(EXYNOS4_CLKSRC_IMAGE),
+	// BASETIS: este registro apunta a una dirección reservada !!
 	SAVE_ITEM(EXYNOS4_CLKDIV_IMAGE),
 	SAVE_ITEM(EXYNOS4212_CLKGATE_IP_IMAGE),
 	SAVE_ITEM(EXYNOS4212_CLKGATE_IP_PERIR),
 };
 #endif
 
+// BASETIS: la función 's5p_gatectrl' controla los gate de los clock
 static int exynos4212_clk_ip_isp0_ctrl(struct clk *clk, int enable)
 {
 	return s5p_gatectrl(EXYNOS4_CLKGATE_IP_ISP0, clk, enable);

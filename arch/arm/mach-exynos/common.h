@@ -58,8 +58,13 @@ void exynos4210_register_clocks(void);
 #ifdef CONFIG_SOC_EXYNOS4212
 void exynos4212_register_clocks(void);
 
+//BASETIS: añadido SOC_EXYNOS4412
+#elif CONFIG_SOC_EXYNOS4412
+void exynos4212_register_clocks(void);
+
 #else
 #define exynos4212_register_clocks()
+
 #endif
 
 extern struct smp_operations exynos_smp_ops;

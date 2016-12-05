@@ -9,6 +9,18 @@
  * published by the Free Software Foundation.
 */
 
+
+/*
+ * BASETIS:
+ *
+ * 	1) Añadidos registros que faltaban.
+ *
+ * 	Comentarios:
+ * 		1) Se ha comprobado que dichos registros no son imprescindibles para el apagado de CPU 2 y 3.
+ *
+ */
+
+
 #ifndef __ASM_ARCH_REGS_PMU_H
 #define __ASM_ARCH_REGS_PMU_H __FILE__
 
@@ -129,6 +141,16 @@
 #define S5P_ARM_CORE1_CONFIGURATION		S5P_PMUREG(0x2080)
 #define S5P_ARM_CORE1_STATUS			S5P_PMUREG(0x2084)
 #define S5P_ARM_CORE1_OPTION			S5P_PMUREG(0x2088)
+// BASETIS: añadimos CPUs 2 y 3 del Exynos4412
+#define S5P_ARM_CORE2_CONFIGURATION		S5P_PMUREG(0x2100)
+#define S5P_ARM_CORE2_STATUS			S5P_PMUREG(0x2104)
+#define S5P_ARM_CORE2_OPTION			S5P_PMUREG(0x2108)
+#define S5P_ARM_CORE3_CONFIGURATION		S5P_PMUREG(0x2180)
+#define S5P_ARM_CORE3_STATUS			S5P_PMUREG(0x2184)
+#define S5P_ARM_CORE3_OPTION			S5P_PMUREG(0x2188)
+// BASETIS: añadimos Caches
+#define S5P_ARM_L2_0_CONFIGURATION		S5P_PMUREG(0x2600)
+#define S5P_ARM_L2_1_CONFIGURATION		S5P_PMUREG(0x2620)
 
 #define S5P_ARM_COMMON_OPTION			S5P_PMUREG(0x2408)
 #define S5P_TOP_PWR_OPTION			S5P_PMUREG(0x2C48)

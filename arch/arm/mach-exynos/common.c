@@ -9,6 +9,20 @@
  * published by the Free Software Foundation.
  */
 
+
+/*
+ * BASETIS:
+ *
+ * 	1) Añadidos comentarios de correcciones que se tendrían que hacer.
+ * 	2) Algunos nombres de registros difieren del datasheet. Se añade indicaciones sobre ello.
+ *
+ * 	Comentarios:
+ * 		1) Faltan por revisar el resto de funciones que no son de 'clocks' o correspondientes al 'mapping'.
+ *
+ */
+
+
+
 #include <linux/kernel.h>
 #include <linux/interrupt.h>
 #include <linux/irq.h>
@@ -133,93 +147,114 @@ static struct map_desc exynos5440_iodesc[] __initdata = {
 };
 #endif
 
+// BASETIS: registros SFR (conversión dir. física-virtual). Pág. 83 datasheet.
 static struct map_desc exynos4_iodesc[] __initdata = {
 	{
+		// BASETIS: registro SYSREG según nomenclatura del datasheet
 		.virtual	= (unsigned long)S3C_VA_SYS,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_SYSCON),
 		.length		= SZ_64K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro PWMTimer según nomenclatura del datasheet
 		.virtual	= (unsigned long)S3C_VA_TIMER,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_TIMER),
 		.length		= SZ_16K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro WDT según nomenclatura del datasheet
 		.virtual	= (unsigned long)S3C_VA_WATCHDOG,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_WATCHDOG),
 		.length		= SZ_4K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro SROMC según nomenclatura del datasheet
 		.virtual	= (unsigned long)S5P_VA_SROMC,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_SROMC),
 		.length		= SZ_4K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro Multi Core Timer (MCT) según nomenclatura del datasheet
 		.virtual	= (unsigned long)S5P_VA_SYSTIMER,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_SYSTIMER),
 		.length		= SZ_4K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro Power Management Unit (PMU) según nomenclatura del datasheet
 		.virtual	= (unsigned long)S5P_VA_PMU,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_PMU),
 		.length		= SZ_64K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro Int_Combiner según nomenclatura del datasheet
 		.virtual	= (unsigned long)S5P_VA_COMBINER_BASE,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_COMBINER),
 		.length		= SZ_4K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro GIC_Controller según nomenclatura del datasheet
 		.virtual	= (unsigned long)S5P_VA_GIC_CPU,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_GIC_CPU),
 		.length		= SZ_64K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro GIC_distributor según nomenclatura del datasheet
 		.virtual	= (unsigned long)S5P_VA_GIC_DIST,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_GIC_DIST),
 		.length		= SZ_64K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro Universal Asynchronous Receiver And Transmitter0 (UART)
 		.virtual	= (unsigned long)S3C_VA_UART,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_UART),
 		.length		= SZ_512K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro CMU_TOP_PART según nomenclatura del datasheet
 		.virtual	= (unsigned long)S5P_VA_CMU,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_CMU),
 		.length		= SZ_128K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: este registro no existe !!
 		.virtual	= (unsigned long)S5P_VA_COREPERI_BASE,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_COREPERI),
 		.length		= SZ_8K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: este registro no existe !!
 		.virtual	= (unsigned long)S5P_VA_L2CC,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_L2CC),
 		.length		= SZ_4K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro GPIO_right según nomenclatura del datasheet
 		.virtual	= (unsigned long)S5P_VA_GPIO2,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_GPIO2),
 		.length		= SZ_4K,
 		.type		= MT_DEVICE,
 	}, {
 		.virtual	= (unsigned long)S5P_VA_DMC0,
+		// BASETIS: este registro apunta a una dirección errónea
+		// BASETIS: dirección correcta es 0x1060_0000
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_DMC0),
 		.length		= SZ_64K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: este registro apunta a una dirección errónea
+		// BASETIS: dirección correcta es 0x1061_0000
 		.virtual	= (unsigned long)S5P_VA_DMC1,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_DMC1),
 		.length		= SZ_64K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro USBOTG1 según nomenclatura del datasheet
 		.virtual	= (unsigned long)S3C_VA_USB_HSPHY,
 		.pfn		= __phys_to_pfn(EXYNOS4_PA_HSPHY),
 		.length		= SZ_4K,
 		.type		= MT_DEVICE,
 	}, {
+		// BASETIS: registro AudioSS
 		.virtual        = (unsigned long)S5P_VA_AUDSS,
 		.pfn            = __phys_to_pfn(EXYNOS4_PA_AUDSS),
 		.length         = SZ_4K,
@@ -373,6 +408,9 @@ void __init exynos_init_late(void)
 
 void __init exynos_init_io(struct map_desc *mach_desc, int size)
 {
+	// BASETIS: maping (traducción de dir. físicas-virtuales)
+	// BASETIS: descripción de las direcciones en pág. 83 del datasheet
+	// BASETIS: 'exynos_iodesc' sólo incluye dir. de CHIPID
 	struct map_desc *iodesc = exynos_iodesc;
 	int iodesc_sz = ARRAY_SIZE(exynos_iodesc);
 #if defined(CONFIG_OF) && defined(CONFIG_ARCH_EXYNOS5)
@@ -398,16 +436,21 @@ void __init exynos_init_io(struct map_desc *mach_desc, int size)
 
 static void __init exynos4_map_io(void)
 {
+	// BASETIS: maping (traducción de dir. físicas-virtuales)
+	// BASETIS: descripción de las direcciones en pág. 83 del datasheet
+	// BASETIS: los reg. que incluye se indican en la estructura 'exynos4_iodesc'
 	iotable_init(exynos4_iodesc, ARRAY_SIZE(exynos4_iodesc));
 
 	if (soc_is_exynos4210() && samsung_rev() == EXYNOS4210_REV_0)
 		iotable_init(exynos4_iodesc0, ARRAY_SIZE(exynos4_iodesc0));
 	else
+		// BASETIS: 'exynos4_iodesc1' sólo incluye dir. de la iRAM
 		iotable_init(exynos4_iodesc1, ARRAY_SIZE(exynos4_iodesc1));
 
 	if (soc_is_exynos4210())
 		iotable_init(exynos4210_iodesc, ARRAY_SIZE(exynos4210_iodesc));
 	if (soc_is_exynos4212() || soc_is_exynos4412())
+		// BASETIS: 'exynos4x12_iodesc' sólo incluye dir. de iRAM NS (non-secure)
 		iotable_init(exynos4x12_iodesc, ARRAY_SIZE(exynos4x12_iodesc));
 
 	/* initialize device information early */
@@ -451,14 +494,20 @@ static void __init exynos4_init_clocks(int xtal)
 {
 	printk(KERN_DEBUG "%s: initializing clocks\n", __func__);
 
+	// BASETIS: esta función registra señales de clock que no se corresponden con el 4412
+	// BASETIS: se tendrían que eliminar de la estructura los que no sean necesarios
 	s3c24xx_register_baseclocks(xtal);
+	// BASETIS: esta función registra señales de clcok que no se correspondes con el 4412
+	// BASETIS: se tendrían que eliminar de la estructura los que no sean necesarios
 	s5p_register_clocks(xtal);
 
 	if (soc_is_exynos4210())
 		exynos4210_register_clocks();
 	else if (soc_is_exynos4212() || soc_is_exynos4412())
+		// BASETIS: configuraciones de fuentes de clock.
 		exynos4212_register_clocks();
 
+	// BASETIS: configuraciones de fuentes de clock.
 	exynos4_register_clocks();
 	exynos4_setup_clocks();
 }

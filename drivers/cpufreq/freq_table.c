@@ -9,6 +9,17 @@
  *
  */
 
+
+
+/*
+ * BASETIS:
+ *
+ * 	1) Comentado código que convertía el rango de frecuencias en 'harcoded'.
+ *
+ */
+
+
+
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/kernel.h>
@@ -45,12 +56,18 @@ int cpufreq_frequency_table_cpuinfo(struct cpufreq_policy *policy,
 	policy->min = policy->cpuinfo.min_freq = min_freq;
 	policy->max = policy->cpuinfo.max_freq = max_freq;
 
-#if defined(CONFIG_ODROID_X) || (CONFIG_CLICKARM_4412)
-	policy->max = 1500000;
-#elif defined(CONFIG_ODROID_X2) || defined(CONFIG_ODROID_U2)
-	policy->max = 1704000;
-#endif
-	policy->min = 200000;
+	//BASETIS: Modificamos las frecuencias
+
+//#if defined(CONFIG_ODROID_X) || (CONFIG_MACH_CLICKARM4412)
+//	policy->max = policy->cpuinfo.max_freq = 1400000;
+	//policy->max = 1500000;
+//	printk(KERN_INFO "Max frequency: %u\n", policy->max);
+//#elif defined(CONFIG_ODROID_X2) || defined(CONFIG_ODROID_U2)
+//	policy->max = policy->cpuinfo.max_freq = 1704000;
+	//policy->max = 1704000;
+//#endif
+	//policy->min = 200000;
+//	policy->min = policy->cpuinfo.min_freq = 200000;
 
 	if (policy->min == ~0)
 		return -EINVAL;

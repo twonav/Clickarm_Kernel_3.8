@@ -9,6 +9,23 @@
  * published by the Free Software Foundation.
 */
 
+
+/*
+ * BASETIS:
+ *
+ * 	1) Tablas de frecuencias adaptadas a las indicadas en el datasheet
+ * 	2) Tabla de voltajes cambiada a valores indicados en el datasheet
+ * 	3) Añadidos mensajes de debug para comprobar valores de registros
+ * 	4) Reconfiguración del MPLL para una salida de 800MHz. -> Baja el consumo !!
+ *
+ * 	Comentarios:
+ * 		1) Los warnings al compilar se refieren a estructuras no usadas. Obviarlos.
+ * 		2) Al modificar el MPLL en 'caliente' el minicom se 'cuelga'.
+ * 		3) Se cree que la AUART1 utilizada por el minicom depende del MPLL (ACLK100).
+ *
+ */
+
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/err.h>
@@ -20,8 +37,10 @@
 #include <mach/regs-clock.h>
 #include <mach/cpufreq.h>
 
-#if defined(CONFIG_ODROID_X) || (CONFIG_CLICKARM_4412)
-#define CPUFREQ_LEVEL_END	(L16 + 1)
+#if defined(CONFIG_ODROID_X) || (CONFIG_MACH_CLICKARM4412)
+// BASETIS: cambio índice de las tablas
+//#define CPUFREQ_LEVEL_END	(L16 + 1)
+#define CPUFREQ_LEVEL_END	(L12 + 1)
 #elif defined(CONFIG_ODROID_X2) || defined(CONFIG_ODROID_U2)
 #define CPUFREQ_LEVEL_END	(L18 + 1)
 #endif
@@ -42,8 +61,10 @@ struct cpufreq_clkdiv {
 
 static unsigned int exynos4x12_volt_table[CPUFREQ_LEVEL_END];
 
-#if defined(CONFIG_ODROID_X) || (CONFIG_CLICKARM_4412)
+#if defined(CONFIG_ODROID_X) || (CONFIG_MACH_CLICKARM4412)
 static struct cpufreq_frequency_table exynos4x12_freq_table[] = {
+// BASETIS: cambio en los valores. Valor máximo soportado es 1400 MHz.
+/*
 	{L0, 1800 * 1000},
 	{L1, 1704 * 1000},
 	{L2, 1600 * 1000},	
@@ -61,6 +82,21 @@ static struct cpufreq_frequency_table exynos4x12_freq_table[] = {
 	{L14,400 * 1000},
 	{L15,300 * 1000},
 	{L16,200 * 1000},
+	{0, CPUFREQ_TABLE_END},
+*/
+	{L0, 1400 * 1000},
+	{L1, 1300 * 1000},
+	{L2, 1200 * 1000},
+	{L3, 1100 * 1000},
+	{L4, 1000 * 1000},
+	{L5, 900 * 1000},
+	{L6,800 * 1000},
+	{L7,700 * 1000},
+	{L8,600 * 1000},
+	{L9,500 * 1000},
+	{L10,400 * 1000},
+	{L11,300 * 1000},
+	{L12,200 * 1000},
 	{0, CPUFREQ_TABLE_END},
 };
 #elif defined(CONFIG_ODROID_X2) || defined(CONFIG_ODROID_U2)
@@ -152,54 +188,57 @@ static unsigned int clkdiv_cpu0_4412[CPUFREQ_LEVEL_END][8] = {
 	{ 0, 3, 7, 0, 6, 1, 2, 0},
 	#endif
 
+// BASETIS: cambio en los valores. Valor máximo soportado es 1400 MHz.
+// BASETIS: los valores de los divisores son opcionales. (Ver pág. 451 datasheet).
+
 	/* 1800 Mhz Support */
-	{ 0, 3, 7, 0, 6, 1, 2, 0},
+	//{ 0, 3, 7, 0, 6, 1, 2, 0},
 
 	/* 1704 Mhz Support */
-	{ 0, 3, 7, 0, 6, 1, 2, 0},
+	//{ 0, 3, 7, 0, 6, 1, 2, 0},
 
 	/* ARM L0: 1600Mhz */
-	{ 0, 3, 7, 0, 6, 1, 2, 0 },
+	//{ 0, 3, 7, 0, 6, 1, 2, 0 },
 	/* ARM L0: 1500 MHz */
+	//{ 0, 3, 7, 0, 6, 1, 2, 0 },
+
+	/* ARM L0: 1400 MHz */
 	{ 0, 3, 7, 0, 6, 1, 2, 0 },
 
-	/* ARM L1: 1400 MHz */
-	{ 0, 3, 7, 0, 6, 1, 2, 0 },
-
-	/* ARM L2: 1300 MHz */
+	/* ARM L1: 1300 MHz */
 	{ 0, 3, 7, 0, 5, 1, 2, 0 },
 
-	/* ARM L3: 1200 MHz */
+	/* ARM L2: 1200 MHz */
 	{ 0, 3, 7, 0, 5, 1, 2, 0 },
 
-	/* ARM L4: 1100 MHz */
+	/* ARM L3: 1100 MHz */
 	{ 0, 3, 6, 0, 4, 1, 2, 0 },
 
-	/* ARM L5: 1000 MHz */
+	/* ARM L4: 1000 MHz */
 	{ 0, 2, 5, 0, 4, 1, 1, 0 },
 
-	/* ARM L6: 900 MHz */
+	/* ARM L5: 900 MHz */
 	{ 0, 2, 5, 0, 3, 1, 1, 0 },
 
-	/* ARM L7: 800 MHz */
+	/* ARM L6: 800 MHz */
 	{ 0, 2, 5, 0, 3, 1, 1, 0 },
 
-	/* ARM L8: 700 MHz */
+	/* ARM L7: 700 MHz */
 	{ 0, 2, 4, 0, 3, 1, 1, 0 },
 
-	/* ARM L9: 600 MHz */
+	/* ARM L8: 600 MHz */
 	{ 0, 2, 4, 0, 3, 1, 1, 0 },
 
-	/* ARM L10: 500 MHz */
+	/* ARM L9: 500 MHz */
 	{ 0, 2, 4, 0, 3, 1, 1, 0 },
 
-	/* ARM L11: 400 MHz */
+	/* ARM L10: 400 MHz */
 	{ 0, 2, 4, 0, 3, 1, 1, 0 },
 
-	/* ARM L12: 300 MHz */
+	/* ARM L11: 300 MHz */
 	{ 0, 2, 4, 0, 2, 1, 1, 0 },
 
-	/* ARM L13: 200 MHz */
+	/* ARM L12: 200 MHz */
 	{ 0, 1, 3, 0, 1, 1, 1, 0 },
 };
 
@@ -261,55 +300,59 @@ static unsigned int clkdiv_cpu1_4412[CPUFREQ_LEVEL_END][3] = {
 	/* 1920Mhz */
 	{ 7, 0, 7 },
 #endif
+
+// BASETIS: cambio en los valores. Valor máximo soportado es 1400 MHz.
+// BASETIS: los valores de los divisores son opcionales. (Ver pág. 451 datasheet).
+
 	/* 1800Mhz */
-	{ 7, 0, 7 },
+	//{ 7, 0, 7 },
 
 	/* 1704Mhz */
-	{ 7, 0, 7 },
+	//{ 7, 0, 7 },
 
 	/* 1600MHz */
-	{ 6, 0, 7 },
+	//{ 6, 0, 7 },
 
 	/* ARM L0: 1500 MHz */
-	{ 6, 0, 7 },
+	//{ 6, 0, 7 },
 
-	/* ARM L1: 1400 MHz */
+	/* ARM L0: 1400 MHz */
 	{ 6, 0, 6 },
 
-	/* ARM L2: 1300 MHz */
+	/* ARM L1: 1300 MHz */
 	{ 5, 0, 6 },
 
-	/* ARM L3: 1200 MHz */
+	/* ARM L2: 1200 MHz */
 	{ 5, 0, 5 },
 
-	/* ARM L4: 1100 MHz */
+	/* ARM L3: 1100 MHz */
 	{ 4, 0, 5 },
 
-	/* ARM L5: 1000 MHz */
+	/* ARM L4: 1000 MHz */
 	{ 4, 0, 4 },
 
-	/* ARM L6: 900 MHz */
+	/* ARM L5: 900 MHz */
 	{ 3, 0, 4 },
 
-	/* ARM L7: 800 MHz */
+	/* ARM L6: 800 MHz */
 	{ 3, 0, 3 },
 
-	/* ARM L8: 700 MHz */
+	/* ARM L7: 700 MHz */
 	{ 3, 0, 3 },
 
-	/* ARM L9: 600 MHz */
+	/* ARM L8: 600 MHz */
 	{ 3, 0, 2 },
 
-	/* ARM L10: 500 MHz */
+	/* ARM L9: 500 MHz */
 	{ 3, 0, 2 },
 
-	/* ARM L11: 400 MHz */
+	/* ARM L10: 400 MHz */
 	{ 3, 0, 1 },
 
-	/* ARM L12: 300 MHz */
+	/* ARM L11: 300 MHz */
 	{ 3, 0, 1 },
 
-	/* ARM L13: 200 MHz */
+	/* ARM L12: 200 MHz */
 	{ 3, 0, 0 },
 };
 
@@ -321,55 +364,60 @@ static unsigned int exynos4x12_apll_pms_table[CPUFREQ_LEVEL_END] = {
 	/* 1920Mhz */
 	((240 << 16) | (3 << 8) | (0x0)),
 #endif
+
+// BASETIS: cambio en los valores. Valor máximo soportado es 1400 MHz.
+// BASETIS: los valores de configuración del APLL son fijos. (Ver pág. 447 datasheet).
+// BASETIS: orden: MDIV, PDIV, SDIV
+
 	/* 1800MHz */
-	((300 << 16) | (4 << 8) | (0x0)),
+	//((300 << 16) | (4 << 8) | (0x0)),
 
 	/* 1704MHz */
-	((213 << 16) | (3 << 8) | (0x0)),
+	//((213 << 16) | (3 << 8) | (0x0)),
 
 	/* 1600MHz */
-	((200 << 16) | (3 << 8) | (0x0)),
+	//((200 << 16) | (3 << 8) | (0x0)),
 
 	/* APLL FOUT L0: 1500 MHz */
-	((250 << 16) | (4 << 8) | (0x0)),
+	//((250 << 16) | (4 << 8) | (0x0)),
 
-	/* APLL FOUT L1: 1400 MHz */
+	/* APLL FOUT L0: 1400 MHz */
 	((175 << 16) | (3 << 8) | (0x0)),
 
-	/* APLL FOUT L2: 1300 MHz */
+	/* APLL FOUT L1: 1300 MHz */
 	((325 << 16) | (6 << 8) | (0x0)),
 
-	/* APLL FOUT L3: 1200 MHz */
+	/* APLL FOUT L2: 1200 MHz */
 	((200 << 16) | (4 << 8) | (0x0)),
 
-	/* APLL FOUT L4: 1100 MHz */
+	/* APLL FOUT L3: 1100 MHz */
 	((275 << 16) | (6 << 8) | (0x0)),
 
-	/* APLL FOUT L5: 1000 MHz */
+	/* APLL FOUT L4: 1000 MHz */
 	((125 << 16) | (3 << 8) | (0x0)),
 
-	/* APLL FOUT L6: 900 MHz */
+	/* APLL FOUT L5: 900 MHz */
 	((150 << 16) | (4 << 8) | (0x0)),
 
-	/* APLL FOUT L7: 800 MHz */
+	/* APLL FOUT L6: 800 MHz */
 	((100 << 16) | (3 << 8) | (0x0)),
 
-	/* APLL FOUT L8: 700 MHz */
+	/* APLL FOUT L7: 700 MHz */
 	((175 << 16) | (3 << 8) | (0x1)),
 
-	/* APLL FOUT L9: 600 MHz */
+	/* APLL FOUT L8: 600 MHz */
 	((200 << 16) | (4 << 8) | (0x1)),
 
-	/* APLL FOUT L10: 500 MHz */
+	/* APLL FOUT L9: 500 MHz */
 	((125 << 16) | (3 << 8) | (0x1)),
 
-	/* APLL FOUT L11 400 MHz */
+	/* APLL FOUT L10 400 MHz */
 	((100 << 16) | (3 << 8) | (0x1)),
 
-	/* APLL FOUT L12: 300 MHz */
+	/* APLL FOUT L11: 300 MHz */
 	((200 << 16) | (4 << 8) | (0x2)),
 
-	/* APLL FOUT L13: 200 MHz */
+	/* APLL FOUT L12: 200 MHz */
 	((100 << 16) | (3 << 8) | (0x2)),
 };
 
@@ -397,7 +445,10 @@ static const unsigned int asv_voltage_4x12[CPUFREQ_LEVEL_END] = {
 };
 #else
 static const unsigned int asv_voltage_4x12[CPUFREQ_LEVEL_END] = {
-     1450000,
+
+// BASETIS: cambio en los valores. No se corresponden con el datasheet. (Ver pág. 2837).
+/*
+	 1450000,
      1400000,
      1400000,
      1350000,
@@ -414,6 +465,20 @@ static const unsigned int asv_voltage_4x12[CPUFREQ_LEVEL_END] = {
       925000,
       925000,
       925000,
+*/
+	 1287500,	// 1400MHz (L0)
+	 1287500,	// 1300MHz (L1)
+	 1187500,	// 1200MHz (L2)
+	 1187500,	// 1100MHz (L3)
+	 1087500,	// 1000MHz (L4)
+	 1087500,	//  900MHz (L5)
+	  987500,	//  800MHz (L6)
+	  987500,	//  700MHz (L7)
+	  987500,	//  600MHz (L8)
+	  937500,	//  500MHz (L9)
+	  937500,	//  400MHz (L10)
+	  937500,	//	300MHz (L11)
+	  900000,	//  200MHz (L12)
 };
 #endif
 static void exynos4x12_set_clkdiv(unsigned int div_index)
@@ -446,6 +511,11 @@ static void exynos4x12_set_clkdiv(unsigned int div_index)
 static void exynos4x12_set_apll(unsigned int index)
 {
 	unsigned int tmp, pdiv;
+	unsigned int apll_con0;
+
+	// BASETIS: código de debug
+	printk(KERN_INFO "BASETIS: exynos4x12_set_apll\n");
+	printk(KERN_INFO "BASETIS: exynos4x12_set_apll, index = %u\n", index);
 
 	/* 1. MUX_CORE_SEL = MPLL, ARMCLK uses MPLL for lock time */
 	clk_set_parent(moutcore, mout_mpll);
@@ -482,6 +552,11 @@ static void exynos4x12_set_apll(unsigned int index)
 		tmp = __raw_readl(EXYNOS4_CLKMUX_STATCPU);
 		tmp &= EXYNOS4_CLKMUX_STATCPU_MUXCORE_MASK;
 	} while (tmp != (0x1 << EXYNOS4_CLKSRC_CPU_MUXCORE_SHIFT));
+
+	// BASETIS: código de debug
+	apll_con0 = __raw_readl(EXYNOS4_APLL_CON0);
+	printk(KERN_INFO "BASETIS: apll_con0 : %u\n", apll_con0);
+
 }
 
 bool exynos4x12_pms_change(unsigned int old_index, unsigned int new_index)
@@ -496,6 +571,11 @@ static void exynos4x12_set_frequency(unsigned int old_index,
 				  unsigned int new_index)
 {
 	unsigned int tmp;
+
+	// BASETIS: código de debug
+	printk(KERN_INFO "BASETIS: exynos4x12_set_frequency\n");
+	printk(KERN_INFO "BASETIS: exynos4x12_set_frequency, old_index = %u\n", old_index);
+	printk(KERN_INFO "BASETIS: exynos4x12_set_frequency, new_index = %u\n", new_index);
 
 	if (old_index > new_index) {
 		if (!exynos4x12_pms_change(old_index, new_index)) {
@@ -548,6 +628,9 @@ int exynos4x12_cpufreq_init(struct exynos_dvfs_info *info)
 	int i;
 	unsigned int tmp;
 	unsigned long rate;
+	//BASETIS:
+	unsigned int apll_con0;
+	unsigned int mpll_con0;
 
 	set_volt_table();
 
@@ -584,6 +667,10 @@ int exynos4x12_cpufreq_init(struct exynos_dvfs_info *info)
 			EXYNOS4_CLKDIV_CPU0_APLL_MASK);
 
 		if (soc_is_exynos4212()) {
+
+			// BASETIS: código de debug
+			printk(KERN_INFO "BASETIS: exynos4212 \n");
+
 			tmp |= ((clkdiv_cpu0_4212[i][0] << EXYNOS4_CLKDIV_CPU0_CORE_SHIFT) |
 				(clkdiv_cpu0_4212[i][1] << EXYNOS4_CLKDIV_CPU0_COREM0_SHIFT) |
 				(clkdiv_cpu0_4212[i][2] << EXYNOS4_CLKDIV_CPU0_COREM1_SHIFT) |
@@ -592,6 +679,10 @@ int exynos4x12_cpufreq_init(struct exynos_dvfs_info *info)
 				(clkdiv_cpu0_4212[i][5] << EXYNOS4_CLKDIV_CPU0_PCLKDBG_SHIFT) |
 				(clkdiv_cpu0_4212[i][6] << EXYNOS4_CLKDIV_CPU0_APLL_SHIFT));
 		} else {
+
+			// BASETIS: código de debugBASETIS:
+			printk(KERN_INFO "BASETIS: exynos4412 \n");
+
 			tmp &= ~EXYNOS4_CLKDIV_CPU0_CORE2_MASK;
 
 			tmp |= ((clkdiv_cpu0_4412[i][0] << EXYNOS4_CLKDIV_CPU0_CORE_SHIFT) |
@@ -634,6 +725,28 @@ int exynos4x12_cpufreq_init(struct exynos_dvfs_info *info)
 	info->freq_table = exynos4x12_freq_table;
 	info->set_freq = exynos4x12_set_frequency;
 	info->need_apll_change = exynos4x12_pms_change;
+
+	// BASETIS: código de debug
+	apll_con0 = __raw_readl(EXYNOS4_APLL_CON0);
+	printk(KERN_INFO "BASETIS: apll_con0 = %x\n", apll_con0);
+	mpll_con0 = __raw_readl(EXYNOS4_MPLL_CON0);
+	printk(KERN_INFO "BASETIS: mpll_con0 = %x\n", mpll_con0);
+
+	// BASETIS: código para reconfigurar el MPLL.
+	__raw_writel(0x0 << 31, EXYNOS4_MPLL_CON0);		// Paramos MPLL
+	mpll_con0 &= 0xFFF4FFFF;
+	__raw_writel(mpll_con0, EXYNOS4_MPLL_CON0);		// Corrección a 800MHz
+	__raw_writel(0x1 << 31, EXYNOS4_MPLL_CON0);		// Arrancamos MPLL
+	do
+	{
+		mpll_con0 = __raw_readl(EXYNOS4_MPLL_CON0);
+	} while (!(mpll_con0 & 0x1 << 29));	// Esperamos al lock del MPLL
+
+
+	printk(KERN_INFO "BASETIS: mpll_freq_khz = %lu\n", rate);
+	printk(KERN_INFO "BASETIS: max_support_idx = %u\n", max_support_idx);
+	printk(KERN_INFO "BASETIS: min_support_idx = %u\n", min_support_idx);
+	//printk(KERN_INFO "BASETIS: cpu_clk : %u\n", cpu_clk);
 
 	return 0;
 
